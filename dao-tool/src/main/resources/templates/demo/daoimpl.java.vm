@@ -1,0 +1,129 @@
+#parse( "demo/header.include.vm" )
+package $package;
+
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.exception.GenericJDBCException;
+import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+
+import $dtoPackage.$dtoClassName;
+import $requestPackage.$requestClassName;
+import $responsePackage.$responseClassName;
+import $daoPackage.$daoInterfaceName;
+/**
+ * @author Robin Long
+ */
+public class $className extends HibernateDaoSupport implements ${dtoClassName}DAO
+{
+	private final String logger = "DEBUGGER." + this.getClass().getName(); 
+
+	public Integer getNewPk() {
+		Session session = this.getSessionFactory().openSession();
+		Integer newPk = null;
+		
+		Query query = session.createQuery("select coalesce(max(s.seq_num), 0) + 1 from ${dtoClassName} s");
+		newPk = Integer.valueOf(query.uniqueResult().toString());
+	
+		return newPk;
+	}
+	
+	public $responseClassName get${dtoClassName}ByPk($requestClassName request) {
+		Log log = LogFactory.getLog(this.logger);
+		final boolean debug = log.isDebugEnabled();
+		
+		if (debug) {
+			log.debug("Acquire ${dtoClassDesc} from ${tableName}");		
+		}
+		
+		$responseClassName response = new ${responseClassName}();
+		List $dtoList = null;
+		
+		if (request.get${dtoClassName}() != null) {
+			try{
+				HibernateTemplate ht = getHibernateTemplate();
+				$dtoList = ht.findByNamedParam("from ${dtoClassName} as s where s.seq_num = :seq_num", "seq_num", request.get${dtoClassName}().getSeq_num());				
+
+			} catch (GenericJDBCException ex) {
+				if (debug) {
+					log.debug("Acquire ${dtoClassDesc} from ${tableName} failure.");
+					log.debug(ex.getSQLException().getMessage());
+				} else {
+					throw new RuntimeException(ex.getSQLException().getMessage());
+				}			
+			}						
+		}
+		
+		if ($dtoList != null) {
+			response.set${dtoClassName}((${dtoClassName}) ${dtoList}.get(0));
+		}
+				
+		return response;
+	}
+
+	public $responseClassName get${dtoClassName}List($requestClassName request) {
+		return get${dtoClassName}List(request, 0, 0);
+	}
+	
+	public $responseClassName get${dtoClassName}List($requestClassName request, final int pageNumber, final int pageSize) {
+		Log log = LogFactory.getLog(this.logger);
+		final boolean debug = log.isDebugEnabled();
+		
+		if (debug) {
+			log.debug("Acquire ${dtoClassDesc} from ${tableName}");		
+		}
+		
+		$responseClassName response = new ${responseClassName}();
+		List $dtoList = null;
+		
+		Session session = this.getSessionFactory().openSession();
+		session.beginTransaction();
+		
+		try{
+			Query query = session.createQuery("from ${dtoClassName} as s where s.field1 like :field1 and s.field2 like :field2 and s.field3 like :field3");
+		
+			/*** pagination configuration ***/
+			if (pageNumber != 0 && pageSize != 0) {
+				query.setFirstResult((pageNumber - 1) * pageSize);
+				query.setMaxResults(pageSize);
+			}	
+			
+			if (request.get${dtoClassName}() != null && request.get${dtoClassName}.getField1() != null) {
+				query.setParameter("field1", request.get${dtoClassName}.getField1());
+			} else {
+				query.setParameter("field1", "%");
+			}
+			
+			if (request.get${dtoClassName}() != null && request.get${dtoClassName}.getField1() != null) {
+				query.setParameter("field1", request.get${dtoClassName}.getField1());
+			} else {
+				query.setParameter("field1", "%");
+			}
+
+			if (request.get${dtoClassName}() != null && request.get${dtoClassName}.getField1() != null) {
+				query.setParameter("field1", request.get${dtoClassName}.getField1());
+			} else {
+				query.setParameter("field1", "%");
+			}			
+						
+			$dtoList = query.list();
+		} catch (GenericJDBCException ex) {
+			if (debug) {
+				log.debug("Acquire ${dtoClassDesc} from ${tableName} failure.");
+				log.debug(ex.getSQLException().getMessage());
+			} else {
+				throw new RuntimeException(ex.getSQLException().getMessage());
+			}			
+		}	
+				
+		response.set${dtoClassName}List($dtoList);	
+		session.getTransaction().commit();	
+				
+		return response;
+	}
+
+	
+}

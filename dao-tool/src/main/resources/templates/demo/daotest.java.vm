@@ -1,0 +1,66 @@
+#parse( "demo/header.include.vm" )
+package $package;
+
+import static org.junit.Assert.*;
+
+import junit.framework.TestCase;
+import org.junit.Test;
+
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+import $dtoPackage.$dtoClassName;
+import $requestPackage.$requestClassName;
+import $responsePackage.$responseClassName;
+
+/**
+ * @author Robin Long
+ */
+public class $className extends TestCase {
+	private SessionFactory sessionFactory = null; 
+
+	/**
+	 * @throws java.lang.Exception
+	 */
+	public void setUp() throws Exception {
+		super.setUp();
+		this.sessionFactory = new Configuration().configure("${testCfgFileName}").buildSessionFactory();
+	}
+
+	/**
+	 * @throws java.lang.Exception
+	 */
+	public void tearDown() throws Exception {
+		super.tearDown();
+		this.sessionFactory.close();
+	}
+
+	/**
+	 * Test method for {@link ${daoimplPackage}.${daoimplClassName}#getNewPk()}.
+	 */
+	@Test
+	public void testGetNewPk() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for
+	 * {@link ${daoimplPackage}.${daoimplClassName}#[[#]]#getEventByPk(${requestPackage}.${requestClassName})}
+	 * .
+	 */
+	@Test
+	public void testGet${requestClassName}ByPk() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for
+	 * {@link ${daoimplPackage}.${daoimplClassName}#[[#]]#getEventList(${requestPackage}.${requestClassName}, int, int)}
+	 * .
+	 */
+	@Test
+	public void testGet${requestClassName}List${requestClassName}RequestIntInt() {
+		fail("Not yet implemented");
+	}	
+}

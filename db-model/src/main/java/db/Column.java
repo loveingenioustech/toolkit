@@ -1,5 +1,6 @@
 package db;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import conversion.Convertor;
@@ -49,6 +50,15 @@ public class Column {
 	}
 
 	public String getJavaDataType() {
+		if (this.type.equalsIgnoreCase("NUMBER")) {
+			if (this.decimalDigits != 0) {
+				return "java.math.BigDecimal";
+
+			} else {
+				return "Integer";
+			}
+		}
+
 		return Convertor.translateOracleTypeToJava(this.type);
 	}
 
@@ -137,25 +147,11 @@ public class Column {
 	}
 
 	public String getGetMethod() {
-		String getMethod = this
-				.getName()
-				.toLowerCase()
-				.replaceFirst(this.name.substring(0, 1),
-						this.name.substring(0, 1).toUpperCase());
-
-		return "get" + getMethod;
+		return "get" + StringUtils.capitalize(this.name);
 	}
 
 	public String getSetMethod() {
-		String output = this.name.substring(0, 1).toUpperCase() + this.name.substring(1).toLowerCase();
-		
-//		String setMethod = this
-//				.getName()
-//				.toLowerCase()
-//				.replaceFirst(this.name.substring(0, 1),
-//						this.name.substring(0, 1).toUpperCase());
-//		return "set" + setMethod;
-		return "set" + output;
+		return "set" + StringUtils.capitalize(this.name);
 	}
 
 	@Override

@@ -1,0 +1,66 @@
+#parse( "demo/header.include.vm" )
+package $package;
+
+import java.io.Serializable;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+/**
+ * @author Robin Long
+ */
+public class $className
+#if ($extendsClass)
+    extends $extendsClass
+#end
+    implements Serializable
+#if ($implementsClasses)
+    #foreach( $implements in $implementsClasses )$implements #end
+#end
+{
+	/**
+	 * Version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+#set ( $columns = $table.getColumns() )	
+
+#foreach ( $column in $columns )
+	/**
+	 * $column.getName()
+	 */
+    private $column.getJavaDataType() $column.getName() = null;
+#end
+
+    public $className() {}
+
+	public $className($table.getConstructorArgs()) {
+		#foreach ( $column in $columns )
+			this.$column.getName() = $column.getName();
+		#end	
+	}
+
+
+#foreach ( $column in $columns )
+    /**
+     * @return the $column.getName()
+     */
+    public $column.getJavaDataType() $column.getGetMethod()()
+    {
+        return this.$column.getName();
+    }
+
+    /**
+     * @param $column.getName() 
+     * 						the $column.getName() to set
+     */
+    public void $column.getSetMethod()(final $column.getJavaDataType() $column.getName())
+    {
+		this.$column.getName() = $column.getName();
+    }
+#end
+
+	public String toString()
+	{
+		return $table.getToStringChain();
+	}
+}

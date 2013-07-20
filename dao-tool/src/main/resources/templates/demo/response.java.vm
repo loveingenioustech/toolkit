@@ -1,0 +1,78 @@
+#parse( "demo/header.include.vm" )
+package $package;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+/**
+ * @author Robin Long
+ */
+public class $className
+#if ($extendsClass)
+    extends $extendsClass
+#end
+    implements Serializable 
+#if ($implementsClasses)
+    #foreach( $implements in $implementsClasses )$implements #end
+#end
+{
+	/**
+	 * Version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Service invocation contxext used to supplied out-of-band data into the DAO
+	 * implementation.
+	 */
+	private Map context = null;
+	
+	private $dtoClassName $dtoObject = null;
+	
+	private List ${dtoObject}List = null;
+	 
+	/**
+     * @return the $dtoClassName
+     */
+	public $dtoClassName get$dtoClassName() {
+		return $dtoObject; 
+	}
+	
+    /**
+     * @param $dtoClassName 
+     * 						the $dtoClassName to set
+     */
+    public void set$dtoClassName(final $dtoClassName $dtoObject) {
+		this.$dtoObject = $dtoObject;
+    }	
+
+	/**
+     * @return the ${dtoClassName}List
+     */
+	public List get${dtoClassName}List() {
+		return ${dtoObject}List; 
+	}
+	
+    /**
+     * @param ${dtoClassName}List 
+     * 						the ${dtoClassName}List to set
+     */
+    public void set${dtoClassName}List(final List ${dtoObject}List) {
+		this.${dtoObject}List = ${dtoObject}List;
+    }	
+
+	public Map getContext() {
+		return this.context;
+	}
+
+	public void setContext(final Map context) {
+		this.context = context;
+	}
+	
+	public String toString()
+	{
+		return new ToStringBuilder(this).appendSuper(super.toString()).append("$dtoObject", $dtoObject).toString();
+	}
+}

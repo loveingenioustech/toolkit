@@ -1,0 +1,60 @@
+#parse( "demo/header.include.vm" )
+package $package;
+
+import java.io.Serializable;
+import java.util.Map;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+/**
+ * @author Robin Long
+ */
+public class $className
+#if ($extendsClass)
+    extends $extendsClass
+#end
+    implements Serializable 
+#if ($implementsClasses)
+    #foreach( $implements in $implementsClasses )$implements #end
+#end
+{
+	/**
+	 * Version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Service invocation contxext used to supplied out-of-band data into the DAO
+	 * implementation.
+	 */
+	private Map context = null;
+	
+	private $dtoClassName $dtoObject = null;
+	 
+	/**
+     * @return the $dtoClassName
+     */
+	public $dtoClassName get$dtoClassName() {
+		return $dtoObject; 
+	}
+	
+    /**
+     * @param $dtoClassName 
+     * 						the $dtoClassName to set
+     */
+    public void set$dtoClassName($dtoClassName $dtoObject) {
+		this.$dtoObject = $dtoObject;
+    }	
+
+	public Map getContext() {
+		return this.context;
+	}
+
+	public void setContext(final Map context) {
+		this.context = context;
+	}
+	
+	public String toString()
+	{
+		return new ToStringBuilder(this).appendSuper(super.toString()).append("context", context).append("$dtoObject", $dtoObject).toString();
+	}
+}

@@ -1,0 +1,20 @@
+#parse( "demo/header.include.vm" )
+package $package;
+
+import $requestPackage.$requestClassName;
+import $responsePackage.$responseClassName;
+
+/**
+ * @author Robin Long
+ */
+public interface $interfaceName
+{
+
+	$responseClassName get${dtoClassName}ByPk($requestClassName request);
+
+	$responseClassName get${dtoClassName}List($requestClassName request);
+	
+	$responseClassName get${dtoClassName}List($requestClassName request, final int pageNumber, final int pageSize);
+
+	Integer getNewPk();
+}
