@@ -45,8 +45,6 @@ import hbm.Property;
 
 public class DemoGenerator extends AbstractGenerator {
 
-	// private Connection conn = null;
-
 	private Table table = null;
 
 	public static void main(String[] args) {
@@ -68,7 +66,7 @@ public class DemoGenerator extends AbstractGenerator {
 		createDTO();
 
 		createHbm();
-
+//
 		updateCfg();
 
 		createRequestWrapper();
@@ -79,7 +77,7 @@ public class DemoGenerator extends AbstractGenerator {
 
 		createDAOImpl();
 
-		updateDbConfig();
+//		updateDbConfig();
 
 		createTest();
 
@@ -135,14 +133,9 @@ public class DemoGenerator extends AbstractGenerator {
 
 		// Filter Columns
 		if (filterColumns != null && filterColumns.length > 0) {
-			System.out.println("filterColumns" + filterColumns[0]);
+			log.info("filterd column: " + filterColumns[0]);
 			CollectionUtil.exclude(table.getColumns(), filterColumns);
 		}
-
-		for (Column c : table.getColumns()) {
-			System.out.println("---------- " + c.getName());
-		}
-
 	}
 
 	private void createDTO() throws Exception {
@@ -150,22 +143,27 @@ public class DemoGenerator extends AbstractGenerator {
 
 		VelocityContext context = new VelocityContext();
 
+		String outputPath = config.getString("java.basepath");
 		String dtoPackage = config.getString("dto.package");
-		String outputPath = config.getString("output.basepath");
 
 		String dtoPackageName = config.getString("dto.packageName");
 		String dtoClassName = config.getString("dto.className");
 
-		log.info(dtoPackage + ":" + dtoClassName);
-
 		context.put("package", dtoPackageName);
 		context.put("className", dtoClassName);
+		
+		for(Column col: table.getColumns()){
+			if(col.getName().contains("#")){
+				col.setName(col.getName().replaceAll("#", "_pound"));
+			}
+		}
+		
 		context.put("table", table);
 
 		Template template = null;
 
 		try {
-			template = Velocity.getTemplate("demo/dto.java.vm");
+			template = Velocity.getTemplate(config.getString("velocity.dto"));
 		} catch (ResourceNotFoundException rnfe) {
 			// couldn't find the template
 			throw new GenerateException("couldn't find the template", rnfe);
@@ -186,7 +184,6 @@ public class DemoGenerator extends AbstractGenerator {
 				+ ".java");
 
 		// -- create all the directories
-		log.debug("getParent: " + file.getParent());
 		if (!file.getParentFile().exists()) {
 			boolean succes = (new File(file.getParent())).mkdirs();
 
@@ -339,7 +336,7 @@ public class DemoGenerator extends AbstractGenerator {
 	}
 
 	private void updateCfg() throws Exception {
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("resource.basepath");
 		String cfgFolder = config.getString("cfg.folder");
 		String cfgFileName = config.getString("cfg.fileName");
 
