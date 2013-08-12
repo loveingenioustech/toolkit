@@ -43,12 +43,12 @@ import hbm.Id;
 import hbm.KeyProperty;
 import hbm.Property;
 
-public class DemoGenerator extends AbstractGenerator {
+public class DaoGenerator extends AbstractGenerator {
 
 	private Table table = null;
 
 	public static void main(String[] args) {
-		DemoGenerator demoGenerator = new DemoGenerator();
+		DaoGenerator demoGenerator = new DaoGenerator();
 
 		demoGenerator.clientCode = "demo";
 
@@ -66,7 +66,7 @@ public class DemoGenerator extends AbstractGenerator {
 		createDTO();
 
 		createHbm();
-//
+
 		updateCfg();
 
 		createRequestWrapper();
