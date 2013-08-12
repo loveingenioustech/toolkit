@@ -22,7 +22,7 @@ import exception.GenerateException;
 public abstract class AbstractGenerator {
 	public static final Logger log = Logger.getLogger(AbstractGenerator.class);
 
-	protected String clientCode = null;
+	protected String configFileName = null;
 
 	protected Configuration config = null;
 
@@ -40,12 +40,12 @@ public abstract class AbstractGenerator {
 	}
 
 	private void init() throws Exception {
-		if (StringUtils.isEmpty(clientCode))
+		if (StringUtils.isEmpty(configFileName))
 			throw new ClientCodeNotAssignedException(
 					"Client Code wasn't assigned in sub class.");
 
 		// load configuration
-		config = ConfigUtil.getConfig(clientCode);
+		config = ConfigUtil.getConfig(configFileName);
 
 		Velocity.init(config.getProperties("velocity.init"));
 	}

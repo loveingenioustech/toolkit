@@ -50,7 +50,7 @@ public class DaoGenerator extends AbstractGenerator {
 	public static void main(String[] args) {
 		DaoGenerator demoGenerator = new DaoGenerator();
 
-		demoGenerator.clientCode = "demo";
+		demoGenerator.configFileName = "demo";
 
 		// TODO
 		// generator name
