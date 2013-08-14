@@ -1,4 +1,4 @@
 /target
 *.log
 *.class
-/src/test/**
+/src/test/java/**

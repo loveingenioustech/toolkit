@@ -23,24 +23,5 @@
     <mapping resource="demo/hbm/Event.hbm.xml" />
     <mapping resource="demo/hbm/Event.hbm.xml" />
     <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
-    <mapping resource="demo/hbm/Event.hbm.xml" />
   </session-factory>
 </hibernate-configuration>

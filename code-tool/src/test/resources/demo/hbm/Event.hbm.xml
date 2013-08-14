@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0"?>                                 
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" 
  "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
@@ -8,6 +8,9 @@
         </id>
         <property name="title" type="string">
             <column name="title" length="50"/>
+        </property>
+        <property name="title_pound" type="string">
+            <column name="title_pound" length="50"/>
         </property>
         <property name="start_date" type="date">
             <column name="start_date"/>
