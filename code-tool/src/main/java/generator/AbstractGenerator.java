@@ -7,6 +7,11 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 import javax.xml.bind.Marshaller;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -99,5 +104,19 @@ public abstract class AbstractGenerator {
 		// out.write(docType);
 		marshaller.marshal(output, out);
 		out.close();
+	}
+
+	protected void write(org.w3c.dom.Document doc, String filePath)
+			throws Exception {
+		doc.getDocumentElement().normalize();
+
+		TransformerFactory transformerFactory = TransformerFactory
+				.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+
+		DOMSource source = new DOMSource(doc);
+		StreamResult result = new StreamResult(new File(filePath));
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.transform(source, result);
 	}
 }

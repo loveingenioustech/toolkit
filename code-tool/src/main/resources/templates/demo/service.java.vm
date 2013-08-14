@@ -1,0 +1,15 @@
+#parse( "demo/header.include.vm" )
+package $servicePackage;
+
+import $request;
+import $response;
+
+/**
+ * @author Robin Long
+ */
+public interface $serviceName
+{
+#foreach ( $method in $methodList )
+	$method.getReturnType() $method.getName()($method.getParameter());
+#end
+}

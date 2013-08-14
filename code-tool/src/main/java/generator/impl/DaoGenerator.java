@@ -1,10 +1,19 @@
 package generator.impl;
 
+import generator.AbstractGenerator;
+import hbm.ColumnElement;
+import hbm.CompositeId;
+import hbm.HibernateMapping;
+import hbm.Id;
+import hbm.KeyProperty;
+import hbm.Property;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -13,6 +22,8 @@ import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
@@ -25,23 +36,17 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.w3c.dom.NodeList;
 
-import conversion.Convertor;
 import util.CollectionUtil;
 import util.CommonUtil;
 import util.DBUtil;
 import util.XmlUtil;
+import conversion.Convertor;
 import db.Column;
 import db.Schema;
 import db.Table;
 import exception.GenerateException;
-import generator.AbstractGenerator;
-import hbm.ColumnElement;
-import hbm.CompositeId;
-import hbm.HibernateMapping;
-import hbm.Id;
-import hbm.KeyProperty;
-import hbm.Property;
 
 public class DaoGenerator extends AbstractGenerator {
 
@@ -51,10 +56,6 @@ public class DaoGenerator extends AbstractGenerator {
 		DaoGenerator demoGenerator = new DaoGenerator();
 
 		demoGenerator.configFileName = "demo";
-
-		// TODO
-		// generator name
-
 		demoGenerator.start();
 	}
 
@@ -77,15 +78,15 @@ public class DaoGenerator extends AbstractGenerator {
 
 		createDAOImpl();
 
-//		updateDbConfig();
+		updateDbConfig();
 
 		createTest();
 
-		// updateTestConfig();
+		adjust();
 	}
 
 	private void updateDbConfig() throws Exception {
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("resource.basepath");
 		String dbconfigFolder = config.getString("dbconfig.folder");
 		String dbconfigFileName = config.getString("dbconfig.fileName");
 
@@ -151,13 +152,13 @@ public class DaoGenerator extends AbstractGenerator {
 
 		context.put("package", dtoPackageName);
 		context.put("className", dtoClassName);
-		
-		for(Column col: table.getColumns()){
-			if(col.getName().contains("#")){
+
+		for (Column col : table.getColumns()) {
+			if (col.getName().contains("#")) {
 				col.setName(col.getName().replaceAll("#", "_pound"));
 			}
 		}
-		
+
 		context.put("table", table);
 
 		Template template = null;
@@ -327,10 +328,10 @@ public class DaoGenerator extends AbstractGenerator {
 		clazz.add(mappingClass);
 		hbm.setClazzOrSubclassOrJoinedSubclass(clazz);
 
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("resource.basepath");
 		String hbmFolder = config.getString("hbm.folder");
-		String filePath = outputPath + "/../resources/" + hbmFolder + "/"
-				+ className + ".hbm.xml";
+		String filePath = outputPath + "/./" + hbmFolder + "/" + className
+				+ ".hbm.xml";
 
 		this.write(marshaller, hbm, filePath);
 	}
@@ -387,7 +388,7 @@ public class DaoGenerator extends AbstractGenerator {
 		VelocityContext context = new VelocityContext();
 
 		String requestPackage = config.getString("request.package");
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("java.basepath");
 
 		String dtoClassName = config.getString("dto.className");
 
@@ -434,7 +435,7 @@ public class DaoGenerator extends AbstractGenerator {
 		VelocityContext context = new VelocityContext();
 
 		String responsePackage = config.getString("response.package");
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("java.basepath");
 
 		String dtoClassName = config.getString("dto.className");
 
@@ -516,7 +517,7 @@ public class DaoGenerator extends AbstractGenerator {
 					mie);
 		}
 
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("java.basepath");
 		String daoPackage = config.getString("dao.package");
 
 		String filePath = outputPath + "/" + daoPackage + "/" + interfaceName
@@ -582,7 +583,7 @@ public class DaoGenerator extends AbstractGenerator {
 					mie);
 		}
 
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("java.basepath");
 		String daoimplPackage = config.getString("daoimpl.packageName")
 				.replace(".", "/");
 
@@ -656,7 +657,7 @@ public class DaoGenerator extends AbstractGenerator {
 					mie);
 		}
 
-		String outputPath = config.getString("output.basepath");
+		String outputPath = config.getString("java.basepath");
 		String daotestPackage = config.getString("daotest.packageName")
 				.replace(".", "/");
 
@@ -666,6 +667,64 @@ public class DaoGenerator extends AbstractGenerator {
 		this.write(template, context, filePath);
 
 		log.info("End createTest ...");
+	}
+
+	private void adjust() throws Exception {
+		log.info("Strat adjust ...");
+
+		// DB
+		String outputPath = config.getString("resource.basepath");
+		String dbconfigFolder = config.getString("dbconfig.folder");
+		String dbconfigFileName = config.getString("dbconfig.fileName");
+		String dbconfigFilePath = outputPath + "/" + dbconfigFolder + "/"
+				+ dbconfigFileName;
+
+		File xmlFile = new File(dbconfigFilePath);
+
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder;
+
+		dBuilder = dbFactory.newDocumentBuilder();
+		org.w3c.dom.Document doc = dBuilder.parse(xmlFile);
+		doc.getDocumentElement().normalize();
+
+		NodeList beans = doc.getElementsByTagName("beans");
+
+		org.w3c.dom.Element rootBeans = (org.w3c.dom.Element) beans.item(0);
+		org.w3c.dom.Element bean = doc.createElement("bean");
+
+		String daoName = config.getString("dao.interfaceName");
+		String daoImplName = config.getString("daoimpl.packageName") + "."
+				+ config.getString("daoimpl.className");
+
+		bean.setAttribute("id", daoName);
+		bean.setAttribute("class", daoImplName);
+
+		org.w3c.dom.Element property = doc.createElement("property");
+
+		property.setAttribute("name", "sesionFactory");
+		property.setAttribute("ref", "SessionFactory");
+
+		bean.appendChild(property);
+		rootBeans.appendChild(bean);
+
+		this.write(doc, dbconfigFilePath);
+		log.info("Updated dbconfig successfully!");
+
+		// Cfg
+		String packageName = config.getString("dot.packageName");
+		String className = config.getString("dto.className");
+		String hbmFolder = config.getString("hbm.folder");
+		String cfgFilePath = outputPath + "/" + hbmFolder + "/" + className
+				+ ".hbm.xml";
+
+		RandomAccessFile file = new RandomAccessFile(cfgFilePath, "rw");
+		file.seek(0);
+		file.writeBytes("<?xml version=\"1.0\"?>                                 \r");
+		log.info("Updated hbm successfully!");
+
+		log.info("End adjust ...");
+
 	}
 
 }

@@ -69,7 +69,8 @@ public class SnippetGenerator extends AbstractGenerator {
 			fragment.append("\");\r\nthis.tables.put(\"Select Statement\", \"");
 			fragment.append(StringUtils.removeEnd(selectStatment.toString(),
 					"||','||"));
-			fragment.append(" from " + table.getName().toLowerCase() + "\";\r\n");
+			fragment.append(" from " + table.getName().toLowerCase()
+					+ "\";\r\n");
 
 			System.out.println(table.getName());
 			System.out.println(fragment.toString());
