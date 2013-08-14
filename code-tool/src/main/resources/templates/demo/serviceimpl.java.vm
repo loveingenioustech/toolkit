@@ -1,0 +1,66 @@
+#parse( "demo/header.include.vm" )
+package $serviceImplPackage;
+
+import java.util.Map;
+import $daoPackageName.$daoInterfaceName;
+import $request;
+import $response;
+import $servicePackage.$serviceName;
+
+/**
+ * @author Robin Long
+ */
+public class ${serviceName}Impl implements $serviceName
+{
+	/**
+	 * DAO	
+	 */
+	private $daoInterfaceName $daoObjectName = null;
+
+	/**
+	 * Context
+	 */
+	private Map context = null;
+
+	/**
+	 * @return the $daoObjectName
+	 */
+	public $daoInterfaceName get$daoInterfaceName() {
+		return this.$daoObjectName;
+	}
+	
+	/**
+	 * @param $daoObjectName
+	 *				the $daoObjectName to set
+	 */	
+	public void set$daoInterfaceName(final $daoInterfaceName $daoObjectName) {
+		this.$daoObjectName = $daoObjectName;
+	}
+	
+	/**
+	 * @return the context
+	 */
+	public Map getContext() {
+		return this.context;
+	}
+
+	/**
+	 * @param context
+	 *				the context to set
+	 */	
+	public void setContext(final Map context) {
+		this.context = context;
+	}
+
+#foreach ( $method in $methodList )
+	/*
+	 * (non-Javadoc)
+	 *	
+	 * @see
+	 * ${servicePackage}.${serviceName}#$method.getName()($method.getRawpara())			
+	 */		
+	public $method.getReturnType() $method.getName()($method.getParameter()){
+		return this.${daoObjectName}.$method.getName()($method.getPassPara());
+	}
+#end
+}
