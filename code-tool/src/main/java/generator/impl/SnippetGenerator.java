@@ -15,9 +15,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import util.DBUtil;
+import view.DataColumn;
+import view.DataTable;
+import db.Column;
 import db.Schema;
 import db.Table;
-import db.Column;
 
 public class SnippetGenerator extends AbstractGenerator {
 
@@ -37,12 +39,79 @@ public class SnippetGenerator extends AbstractGenerator {
 	public void generate() throws Exception {
 		setUp();
 
-		loadKnowledge();
+		// createJavaSnippet();
 
-		createSnippet();
+		createJspSnippet();
 	}
 
-	private void createSnippet() {
+	private void createJspSnippet() throws Exception {
+		Connection conn = DBUtil.getDBConnection(schema);
+
+		// Prepare DataTables
+		Statement stat = conn.createStatement();
+		ResultSet rs = null;
+
+		String[] views = config.getStringArray("jdbc.views");
+		List<DataTable> dataTables = new ArrayList<DataTable>();
+		DataTable dataTable;
+
+		for (int i = 0; i < views.length; i++) {
+			String sql = "select a.text from user_views a where a.view_name = '"
+					+ views[i].toUpperCase() + "'";
+
+			rs = stat.executeQuery(sql);
+
+			String viewText = "";
+			if (rs.next()) {
+				viewText = rs.getString("TEXT");
+			}
+
+			if (StringUtils.isNotEmpty(viewText)) {
+				dataTable = new DataTable();
+				dataTable.setId("dt_" + views[i]);
+				dataTable.setValue("#{result." + views[i] + "}");
+				dataTable.setVar(views[i]);
+
+				parseViewText(viewText, dataTable);
+				dataTables.add(dataTable);
+			}
+		}
+
+		rs.close();
+		stat.close();
+		conn.close();
+
+		// Construct JSP Snippet
+		if (dataTables.size() > 0) {
+			StringBuffer fragment = null;
+
+			for (DataTable dt : dataTables) {
+				fragment = new StringBuffer("<dataTable id=\"" + dt.getId()
+						+ "\" value=\"" + dt.getValue() + "\" var=\""
+						+ dt.getVar() + "\">");
+
+				for (DataColumn dc : dt.getColumns()) {
+					fragment.append("<column>\r\n<header>" + dc.getHeader()
+							+ "</header>");
+					fragment.append("<content>" + dt.getVar() + "."
+							+ dc.getContent() + "</content>");
+					fragment.append("</column>");
+				}
+
+				fragment.append("</dataTable>");
+				
+				System.out.println(dt.getId());
+				System.out.println(fragment.toString() + "\r\n");
+			}
+
+		}
+
+	}
+
+	private void createJavaSnippet() throws Exception {
+		loadKnowledge();
+
+		// Do createJavaSnippet
 		StringBuffer columnNames = null;
 		StringBuffer selectStatment = null;
 		StringBuffer fragment = null;
@@ -119,14 +188,36 @@ public class SnippetGenerator extends AbstractGenerator {
 		String[] columns = viewText.split("\",");
 		String[] tmpArr;
 		String tmpKey;
+
 		for (int i = 0; i < columns.length; i++) {
 			tmpArr = columns[i].split("\"");
 			tmpKey = StringUtils.trim(tmpArr[0]).toLowerCase();
 			if (!knowledgeMap.containsKey(tmpKey)) {
 				knowledgeMap.put(tmpKey, StringUtils.trim(tmpArr[1]));
 			}
-
 		}
+
+	}
+
+	private void parseViewText(String viewText, DataTable dataTable) {
+		Pattern p = Pattern.compile("\\s+\t|\r|\n|select|^from");
+		Matcher m = p.matcher(viewText);
+
+		viewText = m.replaceAll("");
+
+		String[] columns = viewText.split("\",");
+		String[] tmpArr;
+		List<DataColumn> tmpDataColumns = new ArrayList<DataColumn>();
+
+		for (int i = 0; i < columns.length; i++) {
+			tmpArr = columns[i].split("\"");
+
+			tmpDataColumns.add(new DataColumn(null,
+					StringUtils.trim(tmpArr[1]), StringUtils.trim(tmpArr[0])
+							.toLowerCase()));
+		}
+
+		dataTable.setColumns(tmpDataColumns);
 
 	}
 
