@@ -2,6 +2,9 @@ package generator.impl;
 
 import generator.AbstractGenerator;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -12,6 +15,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import util.DBUtil;
@@ -41,7 +45,68 @@ public class SnippetGenerator extends AbstractGenerator {
 
 		// createJavaSnippet();
 
-		createJspSnippet();
+		// createJspSnippet();
+
+		createJspSnippet("UTF-8");
+	}
+
+	private void createJspSnippet(String encoding) throws Exception {
+		String[] views = config.getStringArray("file.views");
+
+		// Prepare DataTables
+		List<DataTable> dataTables = new ArrayList<DataTable>();
+		DataTable dataTable;
+
+		String outputPath = config.getString("resource.basepath");
+		String viewFolder = config.getString("view.config.folder");
+
+		for (int i = 0; i < views.length; i++) {
+
+			String viewText = readFile(outputPath + "/" + viewFolder + "/"
+					+ views[i] + ".sql", encoding);
+
+			if (StringUtils.isNotEmpty(viewText)) {
+				dataTable = new DataTable();
+				dataTable.setId("dt_" + views[i]);
+				dataTable.setValue("#{result." + views[i] + "}");
+				dataTable.setVar(views[i]);
+
+				parseViewText(viewText, dataTable);
+				dataTables.add(dataTable);
+			}
+		}
+
+		// Construct JSP Snippet
+		if (dataTables.size() > 0) {
+			StringBuffer fragment = null;
+
+			for (DataTable dt : dataTables) {
+				fragment = new StringBuffer("<dataTable id=\"" + dt.getId()
+						+ "\" value=\"" + dt.getValue() + "\" var=\""
+						+ dt.getVar() + "\">");
+
+				for (DataColumn dc : dt.getColumns()) {
+					fragment.append("<column>\r\n<header>" + dc.getHeader()
+							+ "</header>");
+					fragment.append("<content>" + dt.getVar() + "."
+							+ dc.getContent() + "</content>");
+					fragment.append("</column>");
+				}
+
+				fragment.append("</dataTable>");
+
+				System.out.println(dt.getId());
+				System.out.println(fragment.toString() + "\r\n");
+			}
+
+		}
+
+	}
+
+	private String readFile(String path, String encoding) throws Exception {
+		FileInputStream fis = new FileInputStream(new File(path));
+
+		return IOUtils.toString(fis, encoding);
 	}
 
 	private void createJspSnippet() throws Exception {
@@ -99,7 +164,7 @@ public class SnippetGenerator extends AbstractGenerator {
 				}
 
 				fragment.append("</dataTable>");
-				
+
 				System.out.println(dt.getId());
 				System.out.println(fragment.toString() + "\r\n");
 			}
@@ -200,7 +265,10 @@ public class SnippetGenerator extends AbstractGenerator {
 	}
 
 	private void parseViewText(String viewText, DataTable dataTable) {
-		Pattern p = Pattern.compile("\\s+\t|\r|\n|select|^from");
+		// ^([^\r]+)\r replace the first line
+		Pattern p = Pattern
+				.compile("^([^\r]+)\r|\\s+\t|\r|\n|as([\n\r\\s]+)select|from([\n\r\\s]+).*");
+
 		Matcher m = p.matcher(viewText);
 
 		viewText = m.replaceAll("");
